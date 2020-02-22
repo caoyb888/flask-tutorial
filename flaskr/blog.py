@@ -26,7 +26,12 @@ def index():
              ' left outer join enjoy e on e.post_id = p.id  and e.author_id = -1'
              ' ORDER BY created DESC'           
          ).fetchall()
-    return render_template('blog/index.html', posts=posts)
+
+    postcomm = db.execute(
+        'Select post_id pid,author_id uid,body from comment'
+    ).fetchall()
+
+    return render_template('blog/index.html', posts=posts,postscomm=postcomm)
 
 @bp.route('/create', methods=('GET', 'POST'))
 @login_required
@@ -147,3 +152,29 @@ def enjoy(id,enjoy_true):
         db.execute('insert into enjoy(author_id,post_id) values(?,?)',(g.user['id'], id))
     db.commit()
     return redirect(url_for('blog.index'))
+
+
+@bp.route('/<int:id>/createcomm', methods=('GET', 'POST'))
+@login_required
+def createcomm(id):
+    post = get_post(id)
+    if request.method == 'POST':
+        body = request.form['body']
+        error = None
+
+        if not body:
+            error = 'Comment is required.'
+
+        if error is not None:
+            flash(error)
+        else:
+            db = get_db()
+            db.execute(
+                'INSERT INTO comment (post_id, body, author_id)'
+                ' VALUES (?, ?, ?)',
+                (id, body, g.user['id'])
+            )
+            db.commit()
+            return redirect(url_for('blog.index'))
+
+    return render_template('blog/createcomm.html',post=post)

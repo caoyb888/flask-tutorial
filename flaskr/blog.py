@@ -28,7 +28,7 @@ def index():
          ).fetchall()
 
     postcomm = db.execute(
-        'Select post_id pid,author_id uid,body from comment'
+        'Select post_id pid,author_id uid,body from comment '
     ).fetchall()
 
     return render_template('blog/index.html', posts=posts,postscomm=postcomm)
@@ -107,6 +107,7 @@ def update(id):
 def delete(id):
     get_post(id)
     db = get_db()
+    db.execute('DELETE FROM comment where id = ?', (id,))
     db.execute('DELETE FROM post WHERE id = ?', (id,))
     db.commit()
     return redirect(url_for('blog.index'))
@@ -178,3 +179,15 @@ def createcomm(id):
             return redirect(url_for('blog.index'))
 
     return render_template('blog/createcomm.html',post=post)
+
+def get_comment(id):
+    db = get_db()
+    postcomm = db.execute(
+        'Select post_id pid,author_id uid,body from comment where post_id = ?',
+        (id,)
+    ).fetchall()
+    return postcomm
+
+def init_comment(app):
+    app.add_template_filter(get_comment,"getcomment")
+    

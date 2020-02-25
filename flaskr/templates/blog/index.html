@@ -32,16 +32,14 @@
       </header>
       <p class="body">{{ post['body'] }}</p>
     </article>
-    {% for postcomm in postscomm %}
-        {{ count = 0 }}
-        {% if post['id'] == postcomm['pid'] %}
-           {% if count == 0 %}
-               <h1>Comment</h1>
-            {% endif %}
-           <p class="body">{{ postcomm['body'] }}</p>
-           {{ count =+ 1}}
-        {% endif %}
-    {% endfor %}
+
+    {% for postcomm in post['id']|getcomment %}
+      {% if loop.first %}
+         <h1>Comment</h1>
+      {% endif %}
+       <p class="body">{{loop.index}}: {{ postcomm['body'] }}</p>
+     {% endfor %}
+   
     {% if not loop.last %}
       <hr>
     {% endif %}
